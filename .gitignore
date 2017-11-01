@@ -1,2 +1,5 @@
 dist
 sklearn_features.egg-info
+.cache
+src/__pycache__
+src/tests/__pycache__
