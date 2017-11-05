@@ -149,6 +149,31 @@ class MultiDateTransformer(_SeriesTransformer):
         return ds.dt.date.isin(self._dates)
 
 
+class LinearDateTransformer(_SeriesTransformer):
+    """ Convert a datetime Series into a float Series.
+
+    Perform a linear transformation based on `d0` and `delta`.
+
+    Defaults:
+     `d0`: training_ds.min()
+     `delta`: 1 day
+    """
+
+    DEFAULT_PIPELINE_NAME = 'linear_date'
+
+    def __init__(self, d0=None, delta=pd.Timedelta(1, 'D')):
+        super().__init__()
+        self.d0_ = d0
+        self.delta_ = delta
+
+    def _fit(self, ds, y):
+        if self.d0_ is None:
+            self.d0_ = ds.min()
+
+    def _transform(self, ds):
+        return (ds - self.d0_) / self.delta_
+
+
 class LabelEncoderWithUnknown(_SeriesTransformer):
     """ Convert a categorical feature into values [0, n], where
     [0, n) represent the known categories from the training data and
