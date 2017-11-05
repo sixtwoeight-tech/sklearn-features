@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.pipeline import FeatureUnion
 
 
-from src.transformers import ScalingTransformer, NullTransformer, DateAttributeTransformer, MultiDateTransformer, LabelEncoderWithUnknown, OneHotWithUnknown
+from src.transformers import ScalingTransformer, NullTransformer, DateAttributeTransformer, MultiDateTransformer, LinearDateTransformer, LabelEncoderWithUnknown, OneHotWithUnknown
 from src.transformers import DataFrameSelector, SeriesReshaper, series_pipeline
 
 
@@ -55,6 +55,14 @@ def test_multi_date_transformer():
     transformer.fit(df['dates'])
     ret = transformer.transform(df['dates'])
     assert (ret == [False, True, False, True, False]).all()
+
+
+def test_linear_date_transformer():
+    df = _create_test_data()
+    transformer = LinearDateTransformer()
+    transformer.fit(df['dates'])
+    ret = transformer.transform(df['dates'])
+    assert (ret == [0, 243, 400, 847, 1712]).all()
 
 
 def test_label_encoder_with_unknown():
@@ -131,6 +139,7 @@ def test_feature_union():
                                               ('is_some_day', series_pipeline('dates', [MultiDateTransformer([date(2014, 10, 4),
                                                                                                               date(2016, 5, 30),
                                                                                                               ])])),
+                                              ('linear_date', series_pipeline('dates', [LinearDateTransformer()])),
                                               ('label_A', series_pipeline('col_A', [LabelEncoderWithUnknown()])),
                                               ])
     features.fit(df)
