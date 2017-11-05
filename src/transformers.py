@@ -3,6 +3,30 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
+DAYS_OF_WEEK = ["Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+                ]
+
+MONTHS_OF_YEAR = ["January",
+                  "February",
+                  "March",
+                  "April",
+                  "May",
+                  "June",
+                  "July",
+                  "August",
+                  "September",
+                  "October",
+                  "November",
+                  "December",
+                  ]
+
+
 class DataFrameSelector(BaseEstimator, TransformerMixin):
     """
     Transforms a DataFrame into a Series by selecting a single column by key.
@@ -36,6 +60,23 @@ class SeriesReshaper(BaseEstimator, TransformerMixin):
 
     def get_feature_names(self):
         return [self.feature_name_]
+
+
+class DataFrameReshaper(BaseEstimator, TransformerMixin):
+    """
+    Transforms a DataFrame of size NxM into an (N, M) shaped numpy array.
+    """
+
+    DEFAULT_PIPELINE_NAME = 'dataframe_reshaper'
+
+    def fit(self, df, y=None):
+        self.feature_names_ = list(df.keys())
+
+    def transform(self, df):
+        return df.values
+
+    def get_feature_names(self):
+        return self.feature_names_
 
 
 class _SeriesTransformer(BaseEstimator, TransformerMixin):
@@ -208,6 +249,20 @@ class OneHotWithUnknown(_SeriesDataFrameTransformer):
         return df
 
 
+class OneHotWithFixedFeatures(_SeriesDataFrameTransformer):
+
+    DEFAULT_PIPELINE_NAME = 'onehot_with_fixed_features'
+
+    def _fit(self, ds, y):
+        self.n_cols_ = len(self.feature_names_)
+
+    def _transform(self, ds):
+        df = pd.DataFrame(False, dtype=bool, columns=self.feature_names_, index=ds.index)
+        for x in range(self.n_cols_):
+            df[self.feature_names_[x]] = ds == x
+        return df
+
+
 class _Pipeline(Pipeline):
 
     def __init__(self, steps, memory=None):
@@ -224,3 +279,7 @@ class _Pipeline(Pipeline):
 
 def series_pipeline(key, steps):
     return _Pipeline(steps=[DataFrameSelector(key)] + steps + [SeriesReshaper()])
+
+
+def dataframe_pipeline(key, steps):
+    return _Pipeline(steps=[DataFrameSelector(key)] + steps + [DataFrameReshaper()])
