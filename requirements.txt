@@ -2,3 +2,5 @@ pandas
 scikit-learn
 pytest
 scipy
+sphinx
+sphinx-autobuild
