@@ -3,3 +3,5 @@ sklearn_features.egg-info
 .cache
 src/__pycache__
 src/tests/__pycache__
+.ipynb_checkpoints/
+docs/_build/
