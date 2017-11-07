@@ -1,8 +1,3 @@
-.. sklearn-features documentation master file, created by
-   sphinx-quickstart on Wed Nov  8 08:32:27 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to sklearn-features's documentation!
 ============================================
 
@@ -10,9 +5,27 @@ Welcome to sklearn-features's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+sklearn-features provides an API to simplify feature engineering with scikit-learn and pandas.
 
-.. automodule:: transformers
-    :members:
+API summary
+-----------
+
+.. autosummary::
+    :toctree: generated/
+
+    transformers.DataFrameSelector
+    transformers.SeriesReshaper
+    transformers.DataFrameReshaper
+    transformers.NullTransformer
+    transformers.ScalingTransformer
+    transformers.DateAttributeTransformer
+    transformers.MultiDateTransformer
+    transformers.LinearDateTransformer
+    transformers.LabelEncoderWithUnknown
+    transformers.OneHotWithUnknown
+    transformers.OneHotWithFixedFeatures
+    transformers.series_pipeline
+    transformers.dataframe_pipeline
 
 Indices and tables
 ==================
