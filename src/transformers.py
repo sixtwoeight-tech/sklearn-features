@@ -1,3 +1,7 @@
+""" Short summary
+
+Longer summary with more details.
+"""
 import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
