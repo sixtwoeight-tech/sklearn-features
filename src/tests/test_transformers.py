@@ -1,10 +1,11 @@
 from datetime import datetime, date
 import pandas as pd
+import numpy as np
 from sklearn.pipeline import FeatureUnion
 
 
-from src.transformers import ScalingTransformer, NullTransformer, DateAttributeTransformer, MultiDateTransformer, LinearDateTransformer, LabelEncoderWithUnknown, OneHotWithUnknown
-from src.transformers import DataFrameSelector, SeriesReshaper, series_pipeline
+from src.transformers import ScalingTransformer, NullTransformer, DateAttributeTransformer, OneHotWithFixedFeatures, MultiDateTransformer, LinearDateTransformer, LabelEncoderWithUnknown, OneHotWithUnknown
+from src.transformers import DataFrameSelector, SeriesReshaper, series_pipeline, DAYS_OF_WEEK, dataframe_pipeline
 
 
 def _create_test_data():
@@ -100,6 +101,24 @@ def test_onehot_with_unknown():
     assert (ret == target).all().all()
 
 
+def test_onehot_with_fixed_features():
+    df = _create_test_data()
+    transformer = OneHotWithFixedFeatures(DAYS_OF_WEEK)
+    ds = df['dates'].dt.dayofweek
+    transformer.fit(ds)
+    ret = transformer.transform(ds)
+    target = pd.DataFrame({"Monday": [True, False, False, True, False],
+                           "Tuesday": [False, False, True, False, False],
+                           "Wednesday": [False, False, False, False, False],
+                           "Thursday": [False, False, False, False, False],
+                           "Friday": [False, False, False, False, True],
+                           "Saturday": [False, True, False, False, False],
+                           "Sunday": [False, False, False, False, False],
+                           })
+    for k in target.keys():
+        assert (ret[k] == target[k]).all()
+
+
 def test_dataframe_selector():
     df = _create_test_data()
     for column in ["col_A", "col_B"]:
@@ -128,6 +147,22 @@ def test_series_pipeline():
         ret = pipeline.transform(df)
         assert ret.shape == (df[column].size, 1)
         assert (ret.reshape((ret.shape[0], )) == df[column].values * scaling_factor).all()
+
+
+def test_dataframe_pipeline():
+    df = _create_test_data()
+    pipeline = dataframe_pipeline('dates', [DateAttributeTransformer('dayofweek'),
+                                            OneHotWithFixedFeatures(DAYS_OF_WEEK),
+                                            ])
+    pipeline.fit(df)
+    ret = pipeline.transform(df)
+    target = np.array([[True, False, False, False, False, False, False],
+                       [False, False, False, False, False, True, False],
+                       [False, True, False, False, False, False, False],
+                       [True, False, False, False, False, False, False],
+                       [False, False, False, False, True, False, False],
+                       ])
+    assert (ret == target).all().all()
 
 
 def test_feature_union():
