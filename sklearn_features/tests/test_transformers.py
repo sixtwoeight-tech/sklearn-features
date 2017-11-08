@@ -4,7 +4,8 @@ import numpy as np
 from sklearn.pipeline import FeatureUnion
 
 
-from sklearn_features.transformers import ScalingTransformer, NullTransformer, DateAttributeTransformer, OneHotWithFixedFeatures, MultiDateTransformer, LinearDateTransformer, LabelEncoderWithUnknown, OneHotWithUnknown
+from sklearn_features.transformers import ScalingTransformer, NullTransformer, DateAttributeTransformer, DateMethodTransformer, EqualitySelector
+from sklearn_features.transformers import OneHotWithFixedFeatures, OneHotWithFixedFeatureDict, MultiDateTransformer, LinearDateTransformer, LabelEncoderWithUnknown, OneHotWithUnknown
 from sklearn_features.transformers import DataFrameSelector, SeriesReshaper, series_pipeline, DAYS_OF_WEEK, dataframe_pipeline
 
 
@@ -25,9 +26,21 @@ def test_null_transformer():
     df = _create_test_data()
     for column in ["col_A", "col_B"]:
         transformer = NullTransformer()
+        ds = transformer.fit_transform(df[column])
+        assert (ds == df[column]).all()
+
+        transformer = NullTransformer()
         transformer.fit(df[column])
         ds = transformer.transform(df[column])
         assert (ds == df[column]).all()
+
+
+def test_equality_transformer():
+    df = _create_test_data()
+    transformer = EqualitySelector(2)
+    transformer.fit(df['col_A'])
+    ds = transformer.transform(df['col_A'])
+    assert (ds == [False, True, False, True, False]).all()
 
 
 def test_scaling_transformer():
@@ -46,6 +59,14 @@ def test_date_attribute_transformer():
     transformer.fit(df['dates'])
     ret = transformer.transform(df['dates'])
     assert (ret == df['dates'].dt.dayofweek).all()
+
+
+def test_date_method_transformer():
+    df = _create_test_data()
+    transformer = DateMethodTransformer('floor', {'freq': '1D'})
+    transformer.fit(df['dates'])
+    ret = transformer.transform(df['dates'])
+    assert (ret == df['dates']).all()
 
 
 def test_multi_date_transformer():
@@ -119,6 +140,24 @@ def test_onehot_with_fixed_features():
         assert (ret[k] == target[k]).all()
 
 
+def test_onehot_with_fixed_feature_dict():
+    df = _create_test_data()
+    transformer = OneHotWithFixedFeatureDict({i: day for i, day in enumerate(DAYS_OF_WEEK)})
+    ds = df['dates'].dt.dayofweek
+    transformer.fit(ds)
+    ret = transformer.transform(ds)
+    target = pd.DataFrame({"Monday": [True, False, False, True, False],
+                           "Tuesday": [False, False, True, False, False],
+                           "Wednesday": [False, False, False, False, False],
+                           "Thursday": [False, False, False, False, False],
+                           "Friday": [False, False, False, False, True],
+                           "Saturday": [False, True, False, False, False],
+                           "Sunday": [False, False, False, False, False],
+                           })
+    for k in target.keys():
+        assert (ret[k] == target[k]).all()
+
+
 def test_dataframe_selector():
     df = _create_test_data()
     for column in ["col_A", "col_B"]:
@@ -143,8 +182,13 @@ def test_series_pipeline():
     for column in ["col_A", "col_B"]:
         scaling_factor = 2.0
         pipeline = series_pipeline(column, [ScalingTransformer(scaling_factor)])
+        ret = pipeline.fit_transform(df)
+        assert ret.shape == (df[column].size, 1)
+        assert (ret.reshape((ret.shape[0], )) == df[column].values * scaling_factor).all()
+
+        pipeline = series_pipeline(column, [ScalingTransformer(scaling_factor)])
         pipeline.fit(df)
-        ret = pipeline.transform(df)
+        ret = pipeline.fit_transform(df)
         assert ret.shape == (df[column].size, 1)
         assert (ret.reshape((ret.shape[0], )) == df[column].values * scaling_factor).all()
 

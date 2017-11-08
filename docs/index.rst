@@ -17,13 +17,16 @@ API summary
     transformers.SeriesReshaper
     transformers.DataFrameReshaper
     transformers.NullTransformer
+    transformers.EqualitySelector
     transformers.ScalingTransformer
     transformers.DateAttributeTransformer
+    transformers.DateMethodTransformer
     transformers.MultiDateTransformer
     transformers.LinearDateTransformer
     transformers.LabelEncoderWithUnknown
     transformers.OneHotWithUnknown
     transformers.OneHotWithFixedFeatures
+    transformers.OneHotWithFixedFeatureDict
     transformers.series_pipeline
     transformers.dataframe_pipeline
 
