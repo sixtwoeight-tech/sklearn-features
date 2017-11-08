@@ -8,5 +8,34 @@
 In the root directory run
 
 ```
-ptest --pyargs src
+pytest --pyargs sklearn_features
+```
+
+
+## Install locally
+
+```
+pip install -e .
+```
+
+## Build
+
+```
+rm -rf dist/
+python setup.py sdist
+python setup.py bdist_wheel
+```
+
+## Release
+
+```
+twine upload dist/*
+```
+
+
+## Build docs
+
+```
+cd docs
+make html
 ```

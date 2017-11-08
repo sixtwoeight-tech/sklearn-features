@@ -4,8 +4,8 @@ import numpy as np
 from sklearn.pipeline import FeatureUnion
 
 
-from src.transformers import ScalingTransformer, NullTransformer, DateAttributeTransformer, OneHotWithFixedFeatures, MultiDateTransformer, LinearDateTransformer, LabelEncoderWithUnknown, OneHotWithUnknown
-from src.transformers import DataFrameSelector, SeriesReshaper, series_pipeline, DAYS_OF_WEEK, dataframe_pipeline
+from sklearn_features.transformers import ScalingTransformer, NullTransformer, DateAttributeTransformer, OneHotWithFixedFeatures, MultiDateTransformer, LinearDateTransformer, LabelEncoderWithUnknown, OneHotWithUnknown
+from sklearn_features.transformers import DataFrameSelector, SeriesReshaper, series_pipeline, DAYS_OF_WEEK, dataframe_pipeline
 
 
 def _create_test_data():

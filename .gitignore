@@ -7,3 +7,4 @@ src/tests/__pycache__
 .ipynb_checkpoints/
 docs/_build/
 docs/generated
+build/
