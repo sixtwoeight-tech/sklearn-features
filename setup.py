@@ -1,9 +1,10 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+from sklearn_features import __version__
 
 setup(
 
     name='sklearn-features',
-    version='0.0.1',
+    version=__version__,
     description='Helpful tools for building feature extraction pipelines with scikit-learn',
     url='https://github.com/sixtwoeight-tech/sklearn-features',
     license='MIT',
@@ -20,7 +21,10 @@ setup(
     install_requires=[
         'scikit-learn',
         'pandas',
+        'scipy',
     ],
 
     python_requires='>=3.3',
+
+    packages=find_packages(),
 )

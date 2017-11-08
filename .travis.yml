@@ -4,4 +4,4 @@ python:
 install:
   - pip install -r requirements.txt
 script:
-  - pytest --pyargs src
+  - pytest --pyargs sklearn_features
