@@ -75,6 +75,7 @@ class DataFrameReshaper(BaseEstimator, TransformerMixin):
 
     def fit(self, df, y=None):
         self.feature_names_ = list(df.keys())
+        return self
 
     def transform(self, df):
         return df.values
@@ -144,6 +145,21 @@ class NullTransformer(_SeriesTransformer):
         return ds
 
 
+class EqualitySelector(_SeriesTransformer):
+
+    DEFAULT_PIPELINE_NAME = 'equality'
+
+    def __init__(self, target):
+        super().__init__()
+        self.target = target
+
+    def _fit(self, ds, y):
+        pass
+
+    def _transform(self, ds):
+        return ds == self.target
+
+
 class ScalingTransformer(_SeriesTransformer):
     """ Apply a constant scaling factor to a Series.
     """
@@ -177,6 +193,25 @@ class DateAttributeTransformer(_SeriesTransformer):
 
     def _transform(self, ds):
         return getattr(ds.dt, self._attr)
+
+
+class DateMethodTransformer(_SeriesTransformer):
+    """ Execute a particular method from the .dt property of a Series.
+
+    https://pandas.pydata.org/pandas-docs/stable/api.html#datetimelike-properties
+    """
+    DEFAULT_PIPELINE_NAME = 'datetime_method'
+
+    def __init__(self, method, kwargs):
+        super().__init__()
+        self._method = method
+        self._kwargs = kwargs
+
+    def _fit(self, ds, y):
+        pass
+
+    def _transform(self, ds):
+        return getattr(ds.dt, self._method)(**self._kwargs)
 
 
 class MultiDateTransformer(_SeriesTransformer):
@@ -264,6 +299,24 @@ class OneHotWithFixedFeatures(_SeriesDataFrameTransformer):
         df = pd.DataFrame(False, dtype=bool, columns=self.feature_names_, index=ds.index)
         for x in range(self.n_cols_):
             df[self.feature_names_[x]] = ds == x
+        return df
+
+
+class OneHotWithFixedFeatureDict(_SeriesDataFrameTransformer):
+
+    DEFAULT_PIPELINE_NAME = 'onehot_with_fixed_features'
+
+    def __init__(self, feature_name_dict):
+        super().__init__(list(feature_name_dict.values()))
+        self.feature_name_dict = feature_name_dict
+
+    def _fit(self, ds, y):
+        self.n_cols_ = len(self.feature_names_)
+
+    def _transform(self, ds):
+        df = pd.DataFrame(False, dtype=bool, columns=self.feature_names_, index=ds.index)
+        for label, feature_name in self.feature_name_dict.items():
+            df[feature_name] = ds == label
         return df
 
 
